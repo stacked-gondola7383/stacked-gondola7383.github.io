@@ -58,13 +58,13 @@ for (const path of ["/", "/docs/intro", "/docs/getting-started", "/docs/language
   check(crypto.includes("valid     : true") && crypto.includes("tampered  : false") && crypto.includes("shared    : true"), "playground: Ed25519/X25519 example");
 
   // bytecode tab
-  await page.click("text=Bytecode");
+  await page.getByRole("tab", { name: "Bytecode" }).click();
   await page.locator("text=/func #\\d+ <init>/").waitFor({ timeout: 30000 });
   check(true, "playground: bytecode listing");
 
   // share link round-trip
-  await page.click("text=Output");
-  await page.click("text=Share");
+  await page.getByRole("tab", { name: "Output" }).click();
+  await page.getByRole("button", { name: "Share" }).click();
   const url = page.url();
   check(url.includes("#code="), "playground: share link created");
   const second = await open(url.replace(base, ""));
