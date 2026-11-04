@@ -34,6 +34,9 @@ jobs:
           repository: e7lang/e7
           ref: ${{ inputs.e7_ref || 'main' }}
           path: e7
+          # e7lang/e7 is read with the default token when it is public; while it is private, add a
+          # repository secret E7_REPO_TOKEN (fine-grained PAT, Contents: read on e7lang/e7).
+          token: ${{ secrets.E7_REPO_TOKEN || github.token }}
       - uses: actions/setup-node@v4
         with: { node-version: "22", cache: npm }
       - uses: mymindstorm/setup-emsdk@v14
