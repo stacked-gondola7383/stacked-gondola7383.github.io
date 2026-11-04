@@ -5,7 +5,7 @@ name: Deploy site
 # Settings -> Pages -> Build and deployment -> Source must be "GitHub Actions".
 on:
   push:
-    branches: [main]
+    branches: [main, docusaurus]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -64,7 +64,7 @@ jobs:
           node scripts/e2e.mjs http://localhost:3210
 
       - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main'
         with: { path: build }
 
   deploy:
