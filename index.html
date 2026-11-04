@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>E7 — the TypeScript you know, running safely inside your app</title>
 <meta name="description" content="E7 is a strictly typed TypeScript subset and e7vm is a small, secure bytecode VM for running signed, server-delivered scripts in Android, iOS, Windows, macOS and Linux apps.">
-<meta property="og:title" content="E7 — signed scripts, safely embedded">
+<meta property="og:title" content="E7 — TypeScript scripts, safely embedded">
 <meta property="og:description" content="A strict TypeScript subset + a tiny, verified bytecode VM for running server-delivered signing and verification scripts inside your app.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://e7lang.github.io/">
@@ -183,9 +183,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <header class="hero">
   <div class="wrap">
     <div>
-      <span class="eyebrow">● Strict TypeScript subset · Signed bytecode · No JIT</span>
+      <span class="eyebrow">● Strict TypeScript subset · Verified bytecode · No JIT</span>
       <h1>The TypeScript you know,<br><span class="grad">running safely inside your app.</span></h1>
-      <p class="lead">E7 lets you ship signing and verification logic as small, signed scripts delivered from your server. e7vm checks the signature, verifies the bytecode, and runs it in a sandbox on Android, iOS, Windows, macOS and Linux.</p>
+      <p class="lead">E7 lets you ship algorithms, such as request signing and verification, as small scripts delivered from your server. e7vm verifies the bytecode and runs it in a sandbox on Android, iOS, Windows, macOS and Linux.</p>
       <div class="cta">
         <a class="btn primary" href="#start">Get started →</a>
         <a class="btn ghost" href="https://github.com/e7lang/e7">View on GitHub</a>
@@ -217,7 +217,7 @@ export function sign(params: Map&lt;string, string&gt;,
   <div class="stats">
     <div class="stat"><b>~470 KB</b><span>runtime library, crypto included</span></div>
     <div class="stat"><b>0 JIT</b><span>pure interpreter, App Store safe</span></div>
-    <div class="stat"><b>Ed25519</b><span>signed modules, verified on load</span></div>
+    <div class="stat"><b>Portable</b><span>one .e7b runs on every platform</span></div>
     <div class="stat"><b>Fast</b><span>on par with V8's interpreter, native crypto</span></div>
   </div>
 </div>
@@ -226,10 +226,10 @@ export function sign(params: Map&lt;string, string&gt;,
   <div class="wrap">
     <div class="kicker">Why E7</div>
     <h2>Update algorithms without shipping a new app</h2>
-    <p class="sub">Request signing, webhook checks and license validation change faster than app releases. E7 moves that logic into small scripts you compile and sign on your server.</p>
+    <p class="sub">Request signing, webhook checks and license validation change faster than app releases. E7 moves that logic into small scripts you compile on your server.</p>
     <div class="grid g3">
-      <div class="card"><div class="icon i1">⚡</div><h3>Ship without a release</h3><p>Compile and sign on your build server, deliver <code>.e7b</code> bytecode over your CDN or API, and the app verifies and runs it.</p></div>
-      <div class="card"><div class="icon i2">🛡️</div><h3>Safe by construction</h3><p>Signature check, then a bytecode verifier that guarantees memory safety even for tampered input, then budgets for instructions, memory and call depth.</p></div>
+      <div class="card"><div class="icon i1">⚡</div><h3>Ship without a release</h3><p>Compile on your build server, deliver <code>.e7b</code> bytecode over your CDN or API, and the app verifies and runs it.</p></div>
+      <div class="card"><div class="icon i2">🛡️</div><h3>Safe by construction</h3><p>A bytecode verifier guarantees memory safety even for tampered input; budgets bound instructions, memory and call depth. Module signatures are optional.</p></div>
       <div class="card"><div class="icon i3">🔑</div><h3>Secrets stay in the host</h3><p>A <code>KeyHandle</code> lets a script use a key held in the Keychain, Keystore or DPAPI without ever reading the key bytes.</p></div>
       <div class="card"><div class="icon i4">🧩</div><h3>TypeScript you already know</h3><p>Every E7 program is valid TypeScript. Use VS Code and <code>tsc --strict</code>; results match Node.js, checked by differential tests.</p></div>
       <div class="card"><div class="icon i5">🔐</div><h3>Batteries for crypto</h3><p>SHA-2/3, HMAC, HKDF, PBKDF2, AES-GCM, ChaCha20-Poly1305, Ed25519, X25519, ECDSA and RSA, running as native code.</p></div>
@@ -242,11 +242,11 @@ export function sign(params: Map&lt;string, string&gt;,
   <div class="wrap">
     <div class="kicker">How it works</div>
     <h2>From TypeScript to a verified, sandboxed call</h2>
-    <p class="sub">Your server compiles and signs. Your app trusts only your public key, and nothing runs until the signature and the bytecode have both been checked.</p>
+    <p class="sub">Your server compiles. Your app verifies the bytecode before anything runs, and can optionally require it to be signed with your key.</p>
     <div class="steps">
       <div class="step"><h3>Write</h3><p>Write a script in the E7 subset of TypeScript, with full type checking in your editor.</p></div>
-      <div class="step"><h3>Compile &amp; sign</h3><p><code>e7c</code> type-checks, compiles to compact bytecode, and signs it with your Ed25519 key.</p></div>
-      <div class="step"><h3>Verify &amp; run</h3><p>e7vm checks the signature, verifies the bytecode, links your host functions, then runs it under a budget.</p></div>
+      <div class="step"><h3>Compile</h3><p><code>e7c</code> type-checks and compiles to compact, portable bytecode, optionally signed with your Ed25519 key.</p></div>
+      <div class="step"><h3>Verify &amp; run</h3><p>e7vm verifies the bytecode (and the signature, if you ask for one), links your host functions, then runs it under a budget.</p></div>
     </div>
     <div class="arch"><img src="assets/architecture.png" alt="e7vm architecture: build server compiles and signs; the app verifies the signature and bytecode, links natives and runs the interpreter" loading="lazy"></div>
   </div>
@@ -387,7 +387,7 @@ false</div>
     <p class="sub">Every layer assumes the bytecode may be hostile. E7 went through four independent security reviews, differential testing against Node.js and OpenSSL, sanitizers and fuzzing, and every finding was fixed with a regression test.</p>
     <div class="grid g2">
       <ul class="checks">
-        <li><div><b>Ed25519 module signatures</b><span>Only modules signed by your trusted public keys load; the check happens before parsing.</span></div></li>
+        <li><div><b>Optional Ed25519 signatures</b><span>When scripts are downloaded at runtime, require modules signed by your key; the check happens before parsing.</span></div></li>
         <li><div><b>Bytecode verifier</b><span>Registers, kinds, indices, jump targets and call metadata are validated, so even tampered bytecode cannot corrupt memory.</span></div></li>
         <li><div><b>Budgets and limits</b><span>An instruction budget (heavy native calls included), a memory limit and a call-depth limit stop runaway scripts.</span></div></li>
       </ul>
@@ -441,15 +441,19 @@ export function main(): string {
       </div>
 
       <div class="gs-step">
-        <div><h3><em>4</em>Compile &amp; sign</h3><p>Keep <code>release.seed</code> on your build server; build <code>release.pub</code> into the app.</p></div>
+        <div><h3><em>4</em>Compile to bytecode</h3><p>One portable <code>.e7b</code> file runs on every platform. Signing is optional: add <code>--sign</code> only when scripts travel over a channel you don't trust.</p></div>
         <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div>
-<pre><code class="language-bash">../../build/e7c --keygen release                  # release.seed (secret) + release.pub
+<pre><code class="language-bash">../../build/e7c sign.ts -o sign.e7b               # portable bytecode
+../../build/e7 sign.e7b                           # run it anywhere
+
+# optional: sign, and let receivers accept only your modules
+../../build/e7c --keygen release                  # release.seed (secret) + release.pub
 ../../build/e7c sign.ts -o sign.e7b --sign release.seed
-../../build/e7 --trust release.pub sign.e7b       # runs only if signed by this key</code></pre></div>
+../../build/e7 --trust release.pub sign.e7b</code></pre></div>
       </div>
 
       <div class="gs-step">
-        <div><h3><em>5</em>Call it from your app</h3><p>Same flow on every platform: create a VM that trusts your key, load the bytecode, call an export.</p></div>
+        <div><h3><em>5</em>Call it from your app</h3><p>Same flow on every platform: create a VM, load the bytecode, call an export.</p></div>
         <div>
           <div class="tabs" role="tablist" data-group="host">
             <button class="tab" role="tab" aria-selected="true" data-panel="h-c">C</button>
@@ -462,10 +466,9 @@ export function main(): string {
 
 e7_config cfg;
 e7_config_init(&amp;cfg);
-cfg.require_signature = 1;            /* only run modules signed by our key */
-cfg.trusted_keys = pub;               /* 32-byte Ed25519 public key(s) baked into the app */
-cfg.num_trusted_keys = 1;
 cfg.memory_limit = 32u &lt;&lt; 20;
+/* optional: only run modules signed by your key
+   cfg.require_signature = 1; cfg.trusted_keys = pub; cfg.num_trusted_keys = 1; */
 e7_vm* vm = e7_vm_new(&amp;cfg);
 
 e7_module* mod;
