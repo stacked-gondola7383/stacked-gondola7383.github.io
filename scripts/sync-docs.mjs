@@ -1,7 +1,7 @@
 // Copies the reference docs from the e7 repository into docs/reference/ so the website always
 // shows the same text as the code it documents.
 //   node scripts/sync-docs.mjs [path-to-e7-checkout]   (default: ../e7, then ./e7)
-import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const candidates = [process.argv[2], process.env.E7_SRC, "e7", "../e7", "../e7fvm"].filter(Boolean);
@@ -30,11 +30,17 @@ for (const p of pages) {
   md = md.replace(/\]\((\.\.\/)([^)#\s]+)(#[^)]*)?\)/g, (_, _up, path, hash = "") => `](${repo}${path}${hash})`);
   md = md.replace(/\]\((?!https?:|#|mailto:)([^)#\s]+\.(?:ts|c|cpp|h|java|kt|swift|cs|json|sh|yml|mmd))(#[^)]*)?\)/g,
     (_, path, hash = "") => `](${repo}docs/${path}${hash})`);
-  md = md.replace(/\]\(architecture\.png\)/g, "](/img/architecture.png)");
+  md = md.replace(/\]\(architecture-(light|dark)\.png\)/g, "](/img/architecture-$1.png)");
   const front = `---\nsidebar_label: ${JSON.stringify(p.label)}\nsidebar_position: ${p.pos}\ndescription: ${JSON.stringify(p.desc)}\n---\n\n`;
   writeFileSync(join(out, p.file), front + md);
   console.log("synced", p.file);
 }
+
+// architecture diagram: one light and one dark variant (transparent PNGs), rendered in the e7 repo
+for (const t of ["light", "dark"]) {
+  copyFileSync(join(src, "docs", `architecture-${t}.png`), resolve(`static/img/architecture-${t}.png`));
+}
+console.log("synced architecture-light.png / architecture-dark.png");
 
 // the standard library reference is generated from lib/e7.d.ts
 const dts = readFileSync(join(src, "lib", "e7.d.ts"), "utf8");

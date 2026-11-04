@@ -41,7 +41,7 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: "img/architecture.png",
+      image: "img/architecture-light.png",
       colorMode: { respectPrefersColorScheme: true },
       navbar: {
         title: "E7",

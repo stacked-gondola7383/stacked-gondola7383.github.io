@@ -14,7 +14,7 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
   --e7-grad: linear-gradient(90deg, #10b981, #0ea5e9);
 }
-[data-theme="dark"] {
+html[data-theme="dark"] {
   --ifm-color-primary: #34d399;
   --ifm-color-primary-dark: #1fca8d;
   --ifm-color-primary-darker: #1dbf85;
@@ -33,3 +33,6 @@
 .markdown h1 { font-weight: 800; letter-spacing: -0.02em; }
 .markdown table { display: table; width: 100%; }
 @media (max-width: 760px) { .markdown table { display: block; } }
+/* light / dark image variants in Markdown: ![...](x-light.png#gh-light-mode-only) ![...](x-dark.png#gh-dark-mode-only) */
+[data-theme="light"] img[src$="#gh-dark-mode-only"],
+[data-theme="dark"] img[src$="#gh-light-mode-only"] { display: none; }

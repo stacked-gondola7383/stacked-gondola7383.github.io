@@ -72,7 +72,7 @@
 .step h3 { margin: 4px 0 6px; font-size: 17px; }
 .step p { margin: 0; color: var(--ifm-color-emphasis-700); font-size: 15px; }
 .arch { text-align: center; }
-.arch img { max-width: min(100%, 760px); border-radius: 14px; border: 1px solid var(--ifm-toc-border-color); background: #fff; }
+.arch img { max-width: min(100%, 1000px); height: auto; }
 
 .split { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; }
 .split > * { min-width: 0; }

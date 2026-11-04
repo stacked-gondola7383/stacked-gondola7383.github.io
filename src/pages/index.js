@@ -3,6 +3,7 @@ import Link from "@docusaurus/Link";
 import Layout from "@theme/Layout";
 import CodeBlock from "@theme/CodeBlock";
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import ThemedImage from "@theme/ThemedImage";
 import styles from "./index.module.css";
 
 const heroCode = `import { hmac } from "e7:crypto";
@@ -83,7 +84,7 @@ function Hero() {
 }
 
 export default function Home() {
-  const arch = useBaseUrl("/img/architecture.png");
+  const arch = { light: useBaseUrl("/img/architecture-light.png"), dark: useBaseUrl("/img/architecture-dark.png") };
   return (
     <Layout
       title="The TypeScript you know, running safely inside your app"
@@ -130,7 +131,7 @@ export default function Home() {
               <div className={styles.step}><h3>Verify &amp; run</h3><p>e7vm verifies the bytecode, links your host functions and runs it under a budget.</p></div>
             </div>
             <div className={styles.arch}>
-              <img src={arch} alt="E7 architecture: the build server compiles; the app verifies, links natives and runs the interpreter" loading="lazy" />
+              <ThemedImage sources={arch} alt="E7 architecture: the build server compiles; the app verifies, links natives and runs the interpreter" loading="lazy" />
             </div>
           </div>
         </section>

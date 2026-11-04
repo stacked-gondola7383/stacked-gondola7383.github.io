@@ -15,7 +15,7 @@ It was built for one job: shipping **algorithms that change faster than your app
 signing, signature verification, webhook checks, license validation) as small scripts that your
 server compiles and your app downloads and runs, without a new app release.
 
-![E7 architecture](/img/architecture.png)
+![E7 architecture](/img/architecture-light.png#gh-light-mode-only)![E7 architecture](/img/architecture-dark.png#gh-dark-mode-only)
 
 ## Why not just embed JavaScript?
 
