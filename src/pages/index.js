@@ -8,18 +8,13 @@ import styles from "./index.module.css";
 
 const heroCode = `import { hmac } from "e7:crypto";
 import { hexEncode } from "e7:encoding";
-import type { KeyHandle } from "e7:crypto";
 
-// The key lives in the Keychain / Keystore.
-// The script can use it, but never see it.
-export function sign(params: Map<string, string>,
-                     key: KeyHandle): string {
-  const enc = (s: string) => encodeURIComponent(s);
-  const query = [...params.keys()].sort()
-    .map(k => \`\${enc(k)}=\${enc(params.get(k)!)}\`)
-    .join("&");
-  const data = new TextEncoder().encode(query);
-  return hexEncode(hmac("sha256", key, data));
+// Your app calls this. Ship updates from
+// your server, without an app release.
+export function sign(msg: string, key: string): string {
+  const enc = new TextEncoder();
+  const mac = hmac("sha256", enc.encode(key), enc.encode(msg));
+  return hexEncode(mac);
 }`;
 
 const features = [
