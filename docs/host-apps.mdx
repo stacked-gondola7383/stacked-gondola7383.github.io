@@ -63,8 +63,9 @@ val sig = vm.call(module, "sign", "a=1&b=2", KeyHandle(1)) as String
 vm.close()
 ```
 
-Build `libe7vm_jni.so` for every ABI with `platform/android/build_android.sh`, and add
-`platform/java/org/e7vm` to your sources.
+Add the dependency `implementation("org.e7vm:e7vm-android:1.0.1")` (desktop JVMs: `org.e7vm:e7vm:1.0.1`, with
+JNI libraries for Linux, macOS and Windows inside). The `.aar` and `.jar` are also attached to every
+[release](https://github.com/e7lang/e7/releases/latest); see the [embedding guide](reference/EMBEDDING.md) for the repository setup.
 
 </TabItem>
 <TabItem value="swift" label="iOS / macOS (Swift)">
@@ -79,11 +80,12 @@ vm.setBudget(10_000_000)
 if case let .string(sig) = try vm.call(module, "sign", .string("a=1&b=2"), .handle(KeyHandle(1))) { print(sig) }
 ```
 
-Build the XCFramework with `platform/ios/build_xcframework.sh`. e7vm uses no JIT and allocates
-no executable memory, which keeps it within the App Store rules for interpreted code.
+Add the Swift package `.package(url: "https://github.com/e7lang/e7.git", from: "1.0.1")` and depend on
+`.product(name: "E7VM", package: "e7")` (or build an XCFramework with `platform/ios/build_xcframework.sh`).
+e7vm uses no JIT and allocates no executable memory, which keeps it within the App Store rules for interpreted code.
 
 </TabItem>
-<TabItem value="csharp" label="Windows (C#)">
+<TabItem value="csharp" label=".NET (C#)">
 
 ```csharp
 // trustedKeys is optional; when given, only modules signed by those keys load
@@ -94,8 +96,8 @@ vm.SetBudget(10_000_000);
 var sig = (string)vm.Call(module, "sign", "a=1&b=2", new E7.KeyHandle(1));
 ```
 
-Build `e7vm.dll` with `platform/windows/build_windows.ps1 -Shared` and add
-`platform/windows/E7VM.cs` to your project.
+`dotnet add package E7VM` (native libraries for Windows x64, Linux x64/arm64 and macOS included; the
+`.nupkg` is also attached to every [release](https://github.com/e7lang/e7/releases/latest)).
 
 </TabItem>
 </Tabs>

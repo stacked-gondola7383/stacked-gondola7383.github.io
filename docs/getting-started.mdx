@@ -31,13 +31,28 @@ Download the archive for your platform from the
 | Windows x64 | `e7-<version>-windows-x64.zip` |
 
 ```bash
-tar -xzf e7-1.0.0-linux-x64.tar.gz
-export PATH="$PWD/e7-1.0.0-linux-x64/bin:$PATH"
-e7 --version        # e7 1.0.0
+tar -xzf e7-1.0.1-linux-x64.tar.gz
+export PATH="$PWD/e7-1.0.1-linux-x64/bin:$PATH"
+e7 --version        # e7 1.0.1
 ```
 
 Each archive contains `bin/e7` (run), `bin/e7c` (compile, sign, disassemble), `include/e7/e7.h`
 and static libraries in `lib/` for embedding, `types/e7.d.ts` for your editor, and examples.
+
+</TabItem>
+<TabItem value="pm" label="Homebrew / Scoop / npm">
+
+```bash
+# Windows (Scoop)
+scoop install https://github.com/e7lang/e7/releases/latest/download/e7.json
+
+# macOS / Linux (Homebrew): the formula is attached to every release as e7.rb
+#   brew tap-new --no-git local/e7 && curl -L -o "$(brew --repository local/e7)/Formula/e7.rb" \
+#     https://github.com/e7lang/e7/releases/latest/download/e7.rb && brew install local/e7/e7
+
+# Any OS with Node.js 18+: the compiler and VM as WebAssembly
+npm install -g @e7lang/e7     # provides `e7-js run|check|compile|disasm`
+```
 
 </TabItem>
 <TabItem value="source" label="Build from source">
@@ -137,9 +152,33 @@ files on Windows). A complete, buildable version is in
 [`examples/embed`](https://github.com/e7lang/e7/tree/main/examples/embed). For Kotlin, Swift
 and C#, see [Calling scripts from your app](host-apps.mdx).
 
-## 6. Set up your editor
+## 6. Test your scripts
 
-Add `e7.d.ts` (in `types/` of the release archive, or `lib/` in the repository) to your
+Put tests in `*.test.ts` files and run them with `e7 test`. Every test runs in a fresh VM:
+
+```ts title="sign.test.ts"
+import { assertEqual } from "e7:test";
+import { sign } from "./sign.ts";
+
+export function testKnownVector(): void {
+  assertEqual(sign("amount=100&currency=CNY", "s3cr3t"),
+              "0fa1ee36e152de30350b6a463f4f365d6574bea59f99ccfebb599c7b6b1f1fd6");
+}
+```
+
+```bash
+e7 test
+# ✓ sign.test.ts › testKnownVector (0.3 ms)
+# 1 passed, 0 failed (1 file, 2 ms)
+```
+
+## 7. Set up your editor
+
+Install the **E7 Language** extension for VS Code (the `.vsix` is attached to every
+[release](https://github.com/e7lang/e7/releases/latest): *Extensions → … → Install from VSIX*). It shows
+the E7 compiler's own errors as you type and adds *Run File*, *Compile to Bytecode* and *Show Bytecode*.
+
+For completion from TypeScript itself, add `e7.d.ts` (in `types/` of the release archive, or `lib/` in the repository) to your
 `tsconfig.json`, and VS Code gives you completion and type errors for E7 scripts:
 
 ```json title="tsconfig.json"
