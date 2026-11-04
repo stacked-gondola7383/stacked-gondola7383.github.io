@@ -1,0 +1,135 @@
+---
+sidebar_position: 4
+title: Calling scripts from your app
+description: Load E7 bytecode and call exported functions from C, Kotlin, Swift and C#.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Calling scripts from your app
+
+The flow is the same on every platform:
+
+1. Create a VM with limits (memory, and optionally the public keys you trust).
+2. Optionally register host functions and a key provider.
+3. `load` the bytecode. It is verified first; top-level code runs once.
+4. Set an instruction budget and `call` an exported function.
+
+<Tabs groupId="host">
+<TabItem value="c" label="C / C++" default>
+
+```c
+#include "e7/e7.h"
+
+e7_config cfg;
+e7_config_init(&cfg);
+cfg.memory_limit = 32u << 20;
+/* optional: only run modules signed by your key
+   cfg.require_signature = 1; cfg.trusted_keys = pub; cfg.num_trusted_keys = 1; */
+e7_vm* vm = e7_vm_new(&cfg);
+
+e7_module* mod;
+if (e7_load(vm, code, len, &mod) != E7_OK) { puts(e7_last_error(vm)); return 1; }
+
+e7_value args[2];
+args[0].type = E7_STRING; args[0].v.str.ptr = "amount=100&currency=CNY"; args[0].v.str.len = 23;
+args[1].type = E7_STRING; args[1].v.str.ptr = "s3cr3t";                  args[1].v.str.len = 6;
+e7_value ret;
+e7_set_budget(vm, 10000000);          /* stop runaway scripts */
+if (e7_call(vm, mod, "sign", args, 2, &ret) == E7_OK)
+  printf("%.*s\n", (int)ret.v.str.len, ret.v.str.ptr);
+e7_vm_free(vm);
+```
+
+Link `libe7vm_static.a`, `libe7_bearssl.a` and `libe7_monocypher.a` (on Windows the `.lib`
+files plus `advapi32.lib`). Complete example:
+[`examples/embed/host.c`](https://github.com/e7lang/e7/blob/main/examples/embed/host.c).
+
+</TabItem>
+<TabItem value="kotlin" label="Android (Kotlin)">
+
+```kotlin
+import org.e7vm.*
+
+val config = E7VM.Config().memoryLimit(32L shl 20)
+    // optional: .requireSignature(SERVER_PUBLIC_KEY)
+val vm = E7VM(config)
+vm.setKeyProvider { id -> keyStoreDecrypt(id) }          // returns a ByteArray
+vm.registerNative("deviceId", ">s") { _ -> Settings.Secure.getString(cr, ANDROID_ID) }
+val module = vm.load(bytesFromServer)                      // throws E7Exception if verification fails
+vm.setBudget(10_000_000)
+val sig = vm.call(module, "sign", "a=1&b=2", KeyHandle(1)) as String
+vm.close()
+```
+
+Build `libe7vm_jni.so` for every ABI with `platform/android/build_android.sh`, and add
+`platform/java/org/e7vm` to your sources.
+
+</TabItem>
+<TabItem value="swift" label="iOS / macOS (Swift)">
+
+```swift
+// trustedKeys is optional; when given, only modules signed by those keys load
+let vm = try E7VM(memoryLimit: 32 << 20, trustedKeys: [serverPublicKey])
+vm.keyProvider = { id in Keychain.key(for: id) }
+try vm.registerNative("deviceId", signature: ">s") { _ in .string(UIDevice.current.identifierForVendor!.uuidString) }
+let module = try vm.load(bytecode)
+vm.setBudget(10_000_000)
+if case let .string(sig) = try vm.call(module, "sign", .string("a=1&b=2"), .handle(KeyHandle(1))) { print(sig) }
+```
+
+Build the XCFramework with `platform/ios/build_xcframework.sh`. e7vm uses no JIT and allocates
+no executable memory, which keeps it within the App Store rules for interpreted code.
+
+</TabItem>
+<TabItem value="csharp" label="Windows (C#)">
+
+```csharp
+// trustedKeys is optional; when given, only modules signed by those keys load
+using var vm = new E7.E7VM(memoryLimit: 32 << 20);
+vm.SetKeyProvider(id => ProtectedData.Unprotect(LoadBlob(id), null, DataProtectionScope.CurrentUser));
+var module = vm.Load(File.ReadAllBytes("app.e7b"));
+vm.SetBudget(10_000_000);
+var sig = (string)vm.Call(module, "sign", "a=1&b=2", new E7.KeyHandle(1));
+```
+
+Build `e7vm.dll` with `platform/windows/build_windows.ps1 -Shared` and add
+`platform/windows/E7VM.cs` to your project.
+
+</TabItem>
+</Tabs>
+
+## Values that cross the boundary
+
+| E7 type | C (`e7_type`) | Kotlin / Java | Swift (`E7Value`) | C# |
+|---|---|---|---|---|
+| `number` | `E7_NUMBER` | `Double` | `.number` | `double` |
+| `boolean` | `E7_BOOL` | `Boolean` | `.bool` | `bool` |
+| `i8`…`i64` | `E7_INT` | `Long` | `.int` | `long` |
+| `u8`…`u64` | `E7_UINT` | `Long` | `.uint` | `ulong` |
+| `string` | `E7_STRING` (UTF-8) | `String` | `.string` | `string` |
+| `Uint8Array` | `E7_BYTES` | `ByteArray` | `.bytes` | `byte[]` |
+| `KeyHandle` | `E7_HANDLE` | `KeyHandle` | `.handle` | `KeyHandle` |
+| `null` / `void` | `E7_NULL` / `E7_VOID` | `null` | `.void` | `null` |
+
+## Keeping secrets in the host
+
+Pass a `KeyHandle` instead of key bytes. When the script calls `hmac(..., key, ...)` the VM
+asks your key provider for the bytes, uses them natively, and never exposes them to the
+script. Store the keys in the Android Keystore, the iOS Keychain or DPAPI.
+
+## Limits
+
+| Limit | Set with | Default |
+|---|---|---|
+| Heap memory | `memory_limit` | 256 MiB |
+| Instructions per call | `e7_set_budget` | unlimited |
+| Call depth | `max_frames` | 20 000 |
+| Register stack | `stack_slots` | 262 144 slots |
+
+With `suspend_on_budget`, an exhausted budget suspends the script instead of failing it, so
+long work can be spread over several frames with `e7_resume`.
+
+The [embedding guide](reference/EMBEDDING.md) covers every API, the threading rules and the
+signing workflow in detail.

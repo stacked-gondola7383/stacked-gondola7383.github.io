@@ -1,0 +1,8 @@
+node_modules/
+build/
+.docusaurus/
+.cache-loader/
+# generated at build time (scripts/sync-docs.mjs, CI wasm build)
+docs/reference/
+static/playground/e7wasm.js
+static/playground/e7wasm.wasm

@@ -1,0 +1,39 @@
+{
+  "name": "e7lang-website",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "sync": "node scripts/sync-docs.mjs",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve",
+    "clear": "docusaurus clear"
+  },
+  "dependencies": {
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/view": "6.43.15",
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/preset-classic": "3.10.2",
+    "@mdx-js/react": "3.1.0",
+    "@uiw/react-codemirror": "4.25.12",
+    "clsx": "2.1.1",
+    "prism-react-renderer": "2.4.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

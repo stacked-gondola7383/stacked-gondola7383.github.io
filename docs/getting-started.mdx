@@ -1,0 +1,154 @@
+---
+sidebar_position: 2
+title: Getting started
+description: Install the E7 toolchain, write a script, compile it to bytecode and run it.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Getting started
+
+From zero to a verified call in five minutes. Every output on this page is real.
+
+:::tip No install needed
+Want to try the language first? Open the **[playground](/playground)**. It runs the real
+compiler and VM in your browser.
+:::
+
+## 1. Install
+
+<Tabs groupId="install">
+<TabItem value="release" label="Prebuilt binaries" default>
+
+Download the archive for your platform from the
+[latest release](https://github.com/e7lang/e7/releases/latest):
+
+| Platform | Archive |
+|---|---|
+| Linux x64 / arm64 | `e7-<version>-linux-x64.tar.gz`, `e7-<version>-linux-arm64.tar.gz` |
+| macOS 11+ (Apple Silicon and Intel) | `e7-<version>-macos-universal.tar.gz` |
+| Windows x64 | `e7-<version>-windows-x64.zip` |
+
+```bash
+tar -xzf e7-1.0.0-linux-x64.tar.gz
+export PATH="$PWD/e7-1.0.0-linux-x64/bin:$PATH"
+e7 --version        # e7 1.0.0
+```
+
+Each archive contains `bin/e7` (run), `bin/e7c` (compile, sign, disassemble), `include/e7/e7.h`
+and static libraries in `lib/` for embedding, `types/e7.d.ts` for your editor, and examples.
+
+</TabItem>
+<TabItem value="source" label="Build from source">
+
+You need CMake 3.16+ and a C++17 compiler (GCC, Clang or MSVC).
+
+```bash
+git clone https://github.com/e7lang/e7.git && cd e7
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+export PATH="$PWD/build:$PATH"
+```
+
+</TabItem>
+</Tabs>
+
+## 2. Write a script
+
+Exported functions are what your app calls. `main` is called when you run a file with the CLI.
+
+```ts title="sign.ts"
+import { hmac } from "e7:crypto";
+import { hexEncode } from "e7:encoding";
+
+// Called by the host app: returns hex(HMAC-SHA256(secret, message))
+export function sign(message: string, secret: string): string {
+  const enc = new TextEncoder();
+  return hexEncode(hmac("sha256", enc.encode(secret), enc.encode(message)));
+}
+
+export function main(): string {
+  return sign("amount=100&currency=CNY", "s3cr3t");
+}
+```
+
+## 3. Run it
+
+`e7` compiles in memory and calls `main` (or any export with `--call fn`).
+
+```bash
+e7 sign.ts
+# 0fa1ee36e152de30350b6a463f4f365d6574bea59f99ccfebb599c7b6b1f1fd6
+```
+
+`console.log` works too, so `console.log("Hello, world!")` on its own is a complete program.
+
+## 4. Compile to bytecode
+
+One portable `.e7b` file runs on every platform and architecture. This is what you deliver
+to your app.
+
+```bash
+e7c sign.ts -o sign.e7b       # type-check + compile
+e7 sign.e7b                   # run the bytecode
+e7c --disasm sign.ts          # look at the instructions
+```
+
+### Optional: sign your modules
+
+Signing is **opt-in**. You only need it when scripts reach the app over a channel you
+don't fully trust. A receiver that has no trusted keys runs any valid module.
+
+```bash
+e7c --keygen release                         # release.seed (secret) + release.pub
+e7c sign.ts -o sign.e7b --sign release.seed
+e7 --trust release.pub sign.e7b              # rejects unsigned or foreign modules
+```
+
+## 5. Call it from your app
+
+The flow is the same on every platform: create a VM, load the bytecode, call an export. In C:
+
+```c title="host.c"
+#include "e7/e7.h"
+
+e7_config cfg;
+e7_config_init(&cfg);
+cfg.memory_limit = 32u << 20;
+e7_vm* vm = e7_vm_new(&cfg);
+
+e7_module* mod;
+if (e7_load(vm, code, len, &mod) != E7_OK) { puts(e7_last_error(vm)); return 1; }
+
+e7_value args[2] = {
+  { .type = E7_STRING, .v.str = { "amount=100&currency=CNY", 23 } },
+  { .type = E7_STRING, .v.str = { "s3cr3t", 6 } },
+};
+e7_value ret;
+e7_set_budget(vm, 10000000);          /* stop runaway scripts */
+if (e7_call(vm, mod, "sign", args, 2, &ret) == E7_OK)
+  printf("%.*s\n", (int)ret.v.str.len, ret.v.str.ptr);
+e7_vm_free(vm);
+```
+
+Link with `lib/libe7vm_static.a lib/libe7_bearssl.a lib/libe7_monocypher.a` (or the `.lib`
+files on Windows). A complete, buildable version is in
+[`examples/embed`](https://github.com/e7lang/e7/tree/main/examples/embed). For Kotlin, Swift
+and C#, see [Calling scripts from your app](host-apps.mdx).
+
+## 6. Set up your editor
+
+Add `e7.d.ts` (in `types/` of the release archive, or `lib/` in the repository) to your
+`tsconfig.json`, and VS Code gives you completion and type errors for E7 scripts:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "ESNext", "moduleResolution": "bundler",
+    "strict": true, "noEmit": true, "lib": ["ES2023", "DOM"], "types": []
+  },
+  "files": ["path/to/e7.d.ts"],
+  "include": ["scripts/**/*.ts"]
+}
+```
