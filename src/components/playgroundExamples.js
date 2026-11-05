@@ -4,7 +4,31 @@ export default [
   {
     "id": "hello",
     "title": "Hello, world",
-    "code": "// Welcome to the E7 playground: a strict TypeScript subset compiled to bytecode\n// and run by e7vm, compiled to WebAssembly, right here in your browser.\n// Press Run (Ctrl/Cmd + Enter).\n\nconst name: string = \"E7\";\nconsole.log(`Hello, ${name}!`);\n\nfor (let i = 1; i <= 15; i++) {\n  console.log(i % 15 === 0 ? \"FizzBuzz\" : i % 3 === 0 ? \"Fizz\" : i % 5 === 0 ? \"Buzz\" : String(i));\n}\n\n// An exported main() is called after the top-level code; its return value is shown below.\nexport function main(): number {\n  return [1, 2, 3, 4].map(x => x * x).reduce((a, b) => a + b, 0);\n}\n",
+    "code": "// Welcome to the E7 playground!\n// Press Run (or Ctrl/Cmd + Enter) to see the output on the right.\nconsole.log(\"Hello, world!\");\n",
+    "expect": 0
+  },
+  {
+    "id": "basics",
+    "title": "Variables and functions",
+    "code": "// Variables: `const` never changes, `let` can be reassigned.\nconst name = \"E7\";\nlet year: number = 2025;\nyear = year + 1;\n\n// Functions have typed parameters and a typed result.\nfunction greet(who: string): string {\n  return `Hello, ${who}!`;\n}\n\n// Arrow functions are handy for short helpers.\nconst add = (a: number, b: number): number => a + b;\n\nconsole.log(greet(name));\nconsole.log(\"Next year is\", year);\nconsole.log(\"2 + 3 =\", add(2, 3));\n",
+    "expect": 0
+  },
+  {
+    "id": "loops",
+    "title": "Loops and conditions",
+    "code": "// for loops, if / else and the ternary operator: the classic FizzBuzz.\nfor (let i = 1; i <= 15; i++) {\n  if (i % 15 === 0) {\n    console.log(\"FizzBuzz\");\n  } else if (i % 3 === 0) {\n    console.log(\"Fizz\");\n  } else {\n    console.log(i % 5 === 0 ? \"Buzz\" : String(i));\n  }\n}\n\n// while loops work too\nlet n = 1;\nwhile (n < 100) n = n * 2;\nconsole.log(\"first power of two >= 100:\", n);\n",
+    "expect": 0
+  },
+  {
+    "id": "arrays",
+    "title": "Arrays and objects",
+    "code": "// Arrays come with the usual methods: map, filter, reduce, sort, join, ...\nconst scores = [72, 95, 58, 88, 100];\nconst passed = scores.filter(s => s >= 60);\nconst total = scores.reduce((sum, s) => sum + s, 0);\nconsole.log(\"passed:\", passed.join(\", \"));\nconsole.log(\"average:\", total / scores.length);\n\n// Objects are described by interfaces.\ninterface Student { name: string; score: number }\nconst students: Student[] = [\n  { name: \"Ann\", score: 95 },\n  { name: \"Bob\", score: 72 },\n  { name: \"Cid\", score: 88 },\n];\nconst best = [...students].sort((a, b) => b.score - a.score)[0];\nconsole.log(`top student: ${best.name} (${best.score})`);\n",
+    "expect": 0
+  },
+  {
+    "id": "exports",
+    "title": "Functions your app calls",
+    "code": "// In a real app, scripts are compiled to bytecode and your app calls\n// the functions marked `export`, passing arguments and reading the result.\nexport function shippingCost(weightKg: number, express: boolean): number {\n  const base = 5 + weightKg * 2;\n  return express ? base * 1.5 : base;\n}\n\n// The playground calls an exported main() and shows its return value.\nexport function main(): string {\n  return `standard: ${shippingCost(3, false)}, express: ${shippingCost(3, true)}`;\n}\n",
     "expect": 0
   },
   {

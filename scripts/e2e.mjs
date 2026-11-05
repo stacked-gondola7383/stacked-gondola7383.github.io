@@ -36,7 +36,17 @@ for (const path of ["/", "/docs/intro", "/docs/getting-started", "/docs/language
   await page.click("#e7-run");
   await page.locator("text=/^ok · /").waitFor({ timeout: 30000 });
   const text = await out.textContent();
-  check(text.includes("Hello, E7!") && text.includes("FizzBuzz") && text.includes("main() → 30"), "playground: hello example runs");
+  check(text.includes("Hello, world!"), "playground: default hello-world example runs");
+
+  await page.selectOption("select", "loops");
+  await page.click("#e7-run");
+  await page.locator("text=/^ok · /").waitFor({ timeout: 30000 });
+  check((await out.textContent()).includes("FizzBuzz"), "playground: loops example");
+
+  await page.selectOption("select", "exports");
+  await page.click("#e7-run");
+  await page.locator("text=/^ok · /").waitFor({ timeout: 30000 });
+  check((await out.textContent()).includes('main() → "standard: 11, express: 16.5"'), "playground: exported main() result shown");
 
   // sandbox example: budget exhaustion is reported, the page stays responsive
   await page.selectOption("select", "sandbox");

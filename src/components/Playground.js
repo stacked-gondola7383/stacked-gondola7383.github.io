@@ -9,7 +9,7 @@ import styles from "./Playground.module.css";
 
 const BUDGET = 5e8;              // instructions per run
 const MEMORY = 128 * 1024 * 1024; // heap limit
-const STORAGE_KEY = "e7-playground-source";
+const STORAGE_KEY = "e7-playground-source-v2"; // bump when the default example changes
 
 const STATUS = {
   0: "ok", 2: "runtime error", 3: "instruction budget exhausted", 4: "memory limit exceeded",
