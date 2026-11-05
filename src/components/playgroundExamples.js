@@ -3,8 +3,8 @@
 export default [
   {
     "id": "hello",
-    "title": "Hello, world",
-    "code": "// Welcome to the E7 playground!\n// Press Run (or Ctrl/Cmd + Enter) to see the output on the right.\nconsole.log(\"Hello, world!\");\n",
+    "title": "Hello, E7 (a quick tour)",
+    "code": "// Welcome to E7: the TypeScript you know, compiled to safe bytecode.\n// Press Run (or Ctrl/Cmd + Enter) to see the output on the right.\nimport { sha256 } from \"e7:crypto\";\nimport { hexEncode } from \"e7:encoding\";\n\nconsole.log(\"Hello, world!\");\n\n// 1. Strict types, even for JSON: the data is checked against User while parsing.\ninterface User { name: string; age: number }\nconst user = JSON.parse('{\"name\":\"Ada\",\"age\":36}') as User;\nconsole.log(`${user.name} is ${user.age}`);\n\n// 2. number behaves exactly like JavaScript; machine integers are there when you need them.\nconsole.log(0.1 + 0.2);\nconst byte: u8 = 255;\nconsole.log(byte + 1);  // u8 wraps around to 0\n\n// 3. Crypto is built in and runs as native code.\nconsole.log(hexEncode(sha256(new TextEncoder().encode(\"hello\"))));\n\n// 4. Your app calls exported functions; the playground calls main().\nexport function main(): string {\n  return `Hello from E7, ${user.name}!`;\n}\n",
     "expect": 0
   },
   {

@@ -36,7 +36,7 @@ for (const path of ["/", "/docs/intro", "/docs/getting-started", "/docs/language
   await page.click("#e7-run");
   await page.locator("text=/^ok · /").waitFor({ timeout: 30000 });
   const text = await out.textContent();
-  check(text.includes("Hello, world!"), "playground: default hello-world example runs");
+  check(text.includes("Hello, world!") && text.includes("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824") && text.includes('main() → "Hello from E7, Ada!"'), "playground: default tour example runs");
 
   await page.selectOption("select", "loops");
   await page.click("#e7-run");
